@@ -1,0 +1,2 @@
+# Set's directory permissions g+rwx,o+rx to be inherited files, but only o=x for directories
+/usr/bin/chmod A=owner@:rwxpDaARWcCos:fd:allow,group@:rwxpDaARWcs:fd:allow,everyone@:xaRcs:fd:allow,everyone@:r:fi:allow $@

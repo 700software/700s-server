@@ -1,0 +1,5 @@
+# Set's the shell/environment variables to follow our standards.
+PATH="/700s/sys/bin:/opt/local/sbin:/opt/local/bin:/usr/gnu/bin:/usr/bin:/usr/sbin:/sbin"
+umask 027
+"$@"
+exit $?

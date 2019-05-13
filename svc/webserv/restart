@@ -1,0 +1,9 @@
+#!/bin/sh
+
+##
+# Same as ./stop; ./start
+##
+
+REAL=`realpath $0`
+cd `dirname $REAL`
+./stop; ./start

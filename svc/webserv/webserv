@@ -1,0 +1,16 @@
+#!/usr/bin/env node
+//#!/usr/bin/env node
+
+//##
+//# This is the main program, which would be called by ./start and kept alive via ./wdog.
+//# The name of this program should equal its parent directory name. (usually webserv)
+//# The commands ./stop, etc manage this program by either pkill or using the socket in /tmp/.webserv.sock
+//##
+
+var brand = require.main.filename.replace(/^.*\//, '')
+var name = require.main.filename.replace(/\/[^\/]*$/, '').replace(/^.*\//, '')
+if(name != brand) {
+    console.error('directory name', name, 'is not equal to executable name', brand)
+    process.exit(9)
+}
+require('./bin/main.node.js')

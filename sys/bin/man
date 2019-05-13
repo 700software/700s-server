@@ -1,0 +1,2 @@
+# This workaround prevents the problem in OmniOS. (as of r151016) If you Ctrl+C while viewing a man doc, the terminal would stop echoing your keystrokes until you login again.
+/usr/bin/man $@|less -ins

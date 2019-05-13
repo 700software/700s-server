@@ -1,0 +1,18 @@
+Instructions to create new instance on AWS
+
+Log into AWS console
+select EC2
+select Launch Instance
+search omniosce
+in community AMIs, select the latest available stable release
+I selected t2.small for this project
+Review & Launch
+let SSD be the default
+Launch
+Create a new key pair, name: embassy
+Download (keep this pem secure. It gives anyone access and losing it would get you locked out!)
+continue to next step
+it says your instance(s) are now launching . the following has been initiated:
+(click the link)
+See the IP address and make a note of this. This will be the A record for the domain name, or you can add it to your hosts file
+Right click: instance settings: change termination protection: enable termination protection

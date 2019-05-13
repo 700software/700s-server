@@ -1,0 +1,2 @@
+# Set's directory permissions g+rw,o+r to be inherited for new files
+/usr/bin/chmod A=owner@:rwpDaARWcCos:fd:allow,owner@:x:d:allow,group@:rwpDaARWcs:fd:allow,group@:x:d:allow,everyone@:raRcs:fd:allow,everyone@:x:d:allow $@

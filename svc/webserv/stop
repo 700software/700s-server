@@ -1,0 +1,21 @@
+#!/bin/sh
+
+##
+# Graceful shutdown of webserv. Blocks until webserv stops listening and a new process may begin.
+# The old webserv process may continue running in the background for up to 5 minutes.
+# If this doesn't work, try sudo pkill -INT webserv
+##
+
+REAL=`realpath $0`
+cd `dirname $REAL`
+NAME=`basename $PWD`
+if [ ! -e "/tmp/.$NAME.pass" ]; then
+	echo "$NAME doesn't seem to be running" >&2
+	exit 0
+fi
+if [ -r "/tmp/.$NAME.pass" ] || [ -w / ] ; then # if user has access to stop command, or if they are root anyway
+	node ./bin/stop.node.js
+	exit $?
+fi
+sudo /700s/sys/env ./stop "$*"
+exit $?

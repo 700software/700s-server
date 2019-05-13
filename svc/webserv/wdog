@@ -1,0 +1,33 @@
+#!/bin/sh
+
+##
+# Utility script, used by ./start to keep ./webserv alive.
+# Restarts except on exit code 0 or 9.
+##
+
+INTERVAL=10 # minimum number of seconds between restarts, in case of restart endless loop
+
+##
+
+if [ $# -eq 0 ]; then
+	echo >&2
+	echo Usage: ./wdog ./webserv >&2
+	echo >&2
+	echo Better to call ./start instead. >&2
+	echo >&2
+	exit 9
+fi
+
+LAST_START=0
+while [ true ]; do
+	NOW=`date +%s`
+	WAIT=`expr $LAST_START - $NOW + $INTERVAL`
+	if [ $WAIT -gt 0 ] && [ $WAIT -le $INTERVAL ]; then
+		sleep $WAIT;
+	fi
+	LAST_START=`date +%s`
+	"$@"
+	if [ $? == 0 ] || [ $? == 9 ]; then
+		exit $?
+	fi
+done
