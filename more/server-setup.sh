@@ -124,6 +124,7 @@ chgrp staff /700s/more; chmod g+s /700s/more; chmod+660 /700s/more
 chmod u=rwx,g=rxs,o=x /700s/sys /700s/log /700s/var /700s/svc /700s/var
 mkdir /700s/sys/start /700s/sys/stop /700s/sys/bin
 chmod o+x /700s/sys/bin
+chmod g+s /700s/web
 chmod+664- /700s/web
 chmod+660 /700s/space
 

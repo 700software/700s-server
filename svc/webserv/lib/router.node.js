@@ -14,8 +14,8 @@ if (require.main == module) { console.error('Direct usage not permitted. Please 
 // can be overridden with ,.node.js
 
 // If any of these file/directory names are found in the path, 404 is returned regardless of whether they exist in the docroot.
-var mask_404 = [ 'WEB-INF', 'META-INF' ]
-// (anything that starts with . returns 404 automatically)
+var mask_404 = [ 'WEB-INF', 'META-INF', 'node_modules' ]
+var unmask_404 = [ '.well-known' ] // anything else that starts with . returns 404 automatically e.g. .git, .zfs, etc.
 
 
 var static_exts = [
@@ -87,14 +87,22 @@ exports = module.exports = function (cio) {
                     http_generic(req, res, 403)
                     return
                 }
-                for (var i = 0; i < mask_404.length; i++)
-                    if (next == '/' + mask_404[i]) {
-                        if (options.onNotFound)
-                            if (options.onNotFound() == false)
-                                return
-                        http_generic(req, res, 404)
-                        return
-                    }
+                var masked = next.startsWith('/.')
+                if (masked)
+                    for (var i = 0; i < unmask_404.length; i++)
+                        if (next == '/' + unmask_404[i])
+                            masked = false
+                else
+                    for (var i = 0; i < mask_404.length; i++)
+                        if (next == '/' + mask_404[i])
+                            masked = true
+                if (masked) {
+                    if (options.onNotFound)
+                        if (options.onNotFound() == false)
+                            return
+                    http_generic(req, res, 404)
+                    return
+                }
             }
             
             tryFilter()
@@ -239,7 +247,20 @@ exports = module.exports = function (cio) {
                                 modules[file].cio.shutdown()
                                 delete modules[file]
                             }
-                            child_io.launch(file, file.replace(/.*\//, ''))
+                            child_io.launch(file, file.replace(/.*\//, ''), {}, function (x) {
+                                msg_io.extend(x)
+                                http_io.extend(x)
+                                x.on('http_log', function (o) {
+                                    cio.http_log.call(cio, o)
+                                })
+                                modules[file] = { cio: x, modified: modified }
+                                goahead(modules[file])
+                                modules_locker.unlock(file)
+                                if(shutdown && modules[file]) {
+                                    modules[file].cio.shutdown()
+                                    delete modules[file]
+                                }
+                            })
                         }
                     })
                 })
