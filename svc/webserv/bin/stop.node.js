@@ -48,6 +48,10 @@ fs.readFile('/tmp/.' + brand + '.pass', 'utf8', function (err, password) {
         clearTimeout(timer)
         if(err.code == 'ECONNREFUSED') {
             console.error('command refused, assuming ' + brand + ' was already killed.')
+        } else if (err.code == 'ENOENT') {
+            console.error(brand + ' does not seem to be running.')
+            fs.unlink('/tmp/.' + brand + '.pass', function () { })
+            process.exit(1)
         } else
             throw err
     })

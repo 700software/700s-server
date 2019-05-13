@@ -5,6 +5,9 @@ if (require.main == module) { console.error('Direct usage not permitted. Please 
 //# Called by main.node.js. Sets up and manages command channels in /tmp.
 //##
 
+var usrWebservd = 80 // 'webservd'
+var grpRoot = 0
+
 var crypto = require('crypto')
 var events = require('events')
 var fs = require('fs')
@@ -32,6 +35,7 @@ exports = module.exports = function () {
             server = http.createServer(requestHandler).on('connection', function (socket) {
                 socket.setTimeout(5000)
             }).on('listening', function () {
+                fs.chown('/tmp/.' + brand + '.sock', usrWebservd, grpRoot, function () { })
                 if(!ending) // I wonder if it would be good to set the Sticky Bit as well?
                     fs.unlink('/tmp/.' + brand + '.pass', function (err) { if(err && err.code != 'ENOENT') throw err // remove in case it was there for different user or something
                         if(!ending)
@@ -39,11 +43,12 @@ exports = module.exports = function () {
                                 if(ending)
                                     fs.unlink('/tmp/.' + brand + '.pass')
                                 else {
+                                    fs.chown('/tmp/.' + brand + '.pass', usrWebservd, grpRoot, function () { })
                                     passThere = true
                                     fs.lstat('/tmp/.' + brand + '.pass', function (err, stats) {
                                         if(ending) return
                                         if(err) throw err
-                                        if(stats.uid == process.getuid() && stats.mode % 01000 == 0600 && stats.isFile()) // verify everything is in order
+                                        if ((stats.uid == process.getuid() || stats.uid == usrWebservd) && stats.mode % 01000 == 0600 && stats.isFile()) // verify everything is in order
                                             fs.writeFile('/tmp/.' + brand + '.pass', password, { mode: 0600 }, function (err) { if(err) throw err
                                                 if(ending)
                                                     fs.unlink('/tmp/.' + brand + '.pass', function (err) { if(err && err.code != 'ENOENT') throw err })
