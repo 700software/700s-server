@@ -14,7 +14,7 @@ if (require.main == module) { console.error('Direct usage not permitted. Please 
 // can be overridden with ,.node.js
 
 // If any of these file/directory names are found in the path, 404 is returned regardless of whether they exist in the docroot.
-var mask_404 = [ 'WEB-INF', 'META-INF', 'node_modules' ]
+var mask_404 = [ 'WEB-INF', 'META-INF', 'node_modules', 'README.md' ]
 var unmask_404 = [ '.well-known' ] // anything else that starts with . returns 404 automatically e.g. .git, .zfs, etc.
 
 
@@ -42,32 +42,15 @@ var util = require('util')
 var fs = require('fs')
 var path = require('path')
 var log = module.parent.require('../lib/log.node.js')
-var msg_io = module.parent.require('../lib/msg_io.node.js')
-var http_io = module.parent.require('../lib/http_io.node.js')
 var lockers = require('../lib/lockers.node.js')
-var child_io = module.parent.exports(module)
 
 // preload modules befre downgrade
 var http_generic = module.parent.require('./http_generic.node.js')
 var staticHandler = module.parent.require('../lib/static.node.js') 
-
-var shutdown = false
-var modules = {}
-var modules_locker = lockers()
+var nodeHandler = module.parent.require('../lib/node.node.js')
 
 exports = module.exports = function (cio) {
-
-    cio.on('shutdown', function () {
-        // indicates shutdown has been initiated and resources should be freed
-        // there may be one or two more requests that come in in which case resources would need to be reallocated and then freed up again
-        shutdown = true
-        var keys = Object.keys(modules) 
-        for (var i = 0; i < keys.length; i++) {
-            modules[keys[i]].cio.shutdown()
-            delete modules[keys[i]]
-        }
-    })
-            
+    
     return route
     function route(docrootBegin, req, res, options) {
     
@@ -214,60 +197,7 @@ exports = module.exports = function (cio) {
         function proceedNode(file, stats, path) {
             req.context += req.pi.substring(0, req.pi.length - path.length)
             req.pi = path
-            var modified = stats.mtime.getTime()
-            if(modules[file] && !modules[file].cio.ok)
-                modules[file] = null
-            if(modules[file] && modules[file].modified == modified) // if module is already loaded
-                goahead(modules[file])
-            else
-                loadit()
-            function loadit() {
-                modules_locker.lock(file, function () {
-                    fs.stat(file, function (err, stats) { // check stats again in case there was some delay obtaining lock
-                        if (err) {
-                            http_generic(req, res, 503)
-                            modules_locker.unlock(file)
-                        } else {
-                            var modified = stats.mtime.getTime()
-                            if(modules[file] && !modules[file].cio.ok)
-                                modules[file] = null
-                            if(modules[file] && modules[file].modified == modified) { // if module is now loaded
-                                goahead(modules[file])
-                                modules_locker.unlock(file)
-                            } else {
-                                var sleep = modified + (modified % 1000 == 0 ? 1000 : 1) - new Date().getTime() // for 1 second precision, sleep to end of second before read. for 1ms precision, sleep to end of ms.
-                                if(sleep > 0)
-                                    setTimeout(slept, sleep)
-                                else
-                                    slept()
-                            }
-                        }
-                        function slept() {
-                            if (modules[file]) {
-                                modules[file].cio.shutdown()
-                                delete modules[file]
-                            }
-                            child_io.launch(file, file.replace(/.*\//, ''), {}, function (x) {
-                                msg_io.extend(x)
-                                http_io.extend(x)
-                                x.on('http_log', function (o) {
-                                    cio.http_log.call(cio, o)
-                                })
-                                modules[file] = { cio: x, modified: modified }
-                                goahead(modules[file])
-                                modules_locker.unlock(file)
-                                if(shutdown && modules[file]) {
-                                    modules[file].cio.shutdown()
-                                    delete modules[file]
-                                }
-                            })
-                        }
-                    })
-                })
-            }
-            function goahead(x) {
-                x.cio.http_request(req, res)
-            }
+            nodeHandler(cio, req, res, file, { stats: stats })
         }
         
         function proceedStatic(file, stats, path) {

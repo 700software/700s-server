@@ -5,8 +5,8 @@ var log = require('./log.node.js')
 var http_generic = require('./http_generic.node.js')
 
 exports.extend = function (cio) {
-    cio.http_request = function (req, res) {
-        if (!cio.linked.emit('http_request', req, res)) {
+    cio.http_request = function (req, res, extra) {
+        if (!cio.linked.emit('http_request', req, res, extra || {})) {
             log.warn(new Error('HTTP 500 because no listener for cio\'s http_request event: ' + cio.linkedName))
             http_generic(req, res, 500)
         }
