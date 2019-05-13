@@ -132,6 +132,7 @@ git init
 git remote add origin https://github.com/musicw/700s-server.git
 git pull https://github.com/musicw/700s-server.git master
 
+chgrp staff .gitignore
 chmod a+rx  /700s/sys/env
 chmod o+x /700s/svc/webserv /700s/svc/webserv/bin /700s/svc/webserv/lib
 chmod o+rx /700s/svc/webserv/bin/* /700s/svc/webserv/lib/*
