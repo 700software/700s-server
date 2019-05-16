@@ -118,14 +118,14 @@ zfs set mountpoint=none syspool/700s
 zfs create -o mountpoint=/700s syspool/700s/main
 zfs create -o dedup=off -o mountpoint=/700s/log syspool/700s/log
 zfs create -o mountpoint=/700s/space syspool/700s/space
-mkdir /700s/more /700s/svc /700s/sys /700s/var /700s/web
-chgrp staff /700s/log /700s/svc /700s/sys /700s/web /700s/var /700s/space /700s/opt /700s/more
+mkdir /700s/more /700s/svc /700s/sys /700s/var /700s/web /700s/lib
+chgrp staff /700s/log /700s/svc /700s/sys /700s/web /700s/var /700s/space /700s/opt /700s/more /700s/lib
 chgrp staff /700s/more; chmod g+s /700s/more; chmod+660 /700s/more
 chmod u=rwx,g=rxs,o=x /700s/sys /700s/log /700s/var /700s/svc /700s/var
 mkdir /700s/sys/start /700s/sys/stop /700s/sys/bin
 chmod o+x /700s/sys/bin
-chmod g+s /700s/web
-chmod+664- /700s/web
+chmod g+s /700s/web /700s/lib
+chmod+664- /700s/web /700s/lib
 chmod+660 /700s/space
 
 cd /700s
