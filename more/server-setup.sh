@@ -1,5 +1,5 @@
 
-### RESOLVE syspool volume tagging mismatch ###
+### RESOLVE rpool volume tagging mismatch ###
 
 zpool status # see the device is c4t0d0
 sudo format # see the device is c1t0d0. This is mismatched
@@ -10,11 +10,12 @@ sudo format # see the device is c1t0d0. This is mismatched
 # the issue is that the zpool thinks its c4, but as you can see in sudo format, it's coming out as c1
 # • First create additional Volume of the same size within the EC2 Console on AWS
 # • Attach the volume to the same Instance. Device defaults to /dev/sdf
-zpool attach syspool c4t0d0 c1t5d0
+zpool attach rpool c4t0d0 c1t5d0
 zpool status # wait for resilver to complete
-zpool detach syspool c4t0d0 # because it's mislabeled
-zpool attach syspool c1t5d0 c1t0d0 # reattach same volume, now using correct name (matching sudo format)
-zpool detach syspool c1t5d0
+zpool detach rpool c4t0d0 # because it's mislabeled
+zpool attach rpool c1t5d0 c1t0d0 # reattach same volume, now using correct name (matching sudo format)
+zpool status # wait for resilver to complete
+zpool detach rpool c1t5d0
 # • Now you can detach and delete that volume from EC2
 
 ### UPDATE packages ###
@@ -46,8 +47,8 @@ echo "#"'!'"/usr/bin/sh\ncase \"\$1\" in\n'start')\n\t/700s/sys/env /700s/sys/st
 chmod u+x /etc/rc3.d/S700s; chgrp staff /etc/rc3.d/S700s
 ln -s ../rc3.d/S700s /etc/rc0.d/K700s
 (grep '#' /etc/auto_master; echo; echo "## Lines removed by us"; grep -v '#' /etc/auto_master | sed 's/^/#/') > /etc/auto_master.new; cat /etc/auto_master.new > /etc/auto_master; rm /etc/auto_master.new
-svcadm disable -s autofs; svcadm enable -s autofs; svcadm disable -s autofs # ignore warnings
-zfs create -o mountpoint=/home -o compress=on -o dedup=on syspool/home
+svcadm disable -s autofs; svcadm enable -s autofs; svcadm disable -s autofs
+zfs create -o mountpoint=/home -o compress=on -o dedup=on rpool/home
 rmdir /net
 chgrp staff /home
 chmod g+s,o= /home
@@ -101,7 +102,7 @@ sudo git config --global --edit # set default name and email for commits done as
 
 chmod g+w /etc/motd; sudo chgrp staff /etc/motd
 
-zfs create -o mountpoint=/opt/local syspool/opt-local
+zfs create -o mountpoint=/opt/local rpool/opt-local
 cd /tmp; curl -O https://pkgsrc.joyent.com/packages/SmartOS/bootstrap/bootstrap-trunk-x86_64-20190317.tar.gz
 cd /; tar -zxpf /tmp/bootstrap-trunk-x86_64-20190317.tar.gz
 mkdir /opt/local/var /opt/local/var/db
@@ -112,26 +113,28 @@ pkgin install nodejs
 
 ### PRIMARY directory /700s ###
 
-zfs create -o mountpoint=/700s -o aclinherit=passthrough -o snapdir=visible -o dedup=on syspool/700s
+zfs create -o mountpoint=/700s -o aclinherit=passthrough -o snapdir=visible -o dedup=on rpool/700s
 chmod g=rx,o= /700s; chgrp 700s /700s
-zfs set mountpoint=none syspool/700s
-zfs create -o mountpoint=/700s syspool/700s/main
-zfs create -o dedup=off -o mountpoint=/700s/log syspool/700s/log
-zfs create -o mountpoint=/700s/space syspool/700s/space
+zfs set mountpoint=none rpool/700s
+zfs create -o mountpoint=/700s rpool/700s/main
+zfs create -o dedup=off -o mountpoint=/700s/log rpool/700s/log
+zfs create -o mountpoint=/700s/space rpool/700s/space
 mkdir /700s/more /700s/svc /700s/sys /700s/var /700s/web /700s/lib
-chgrp staff /700s/log /700s/svc /700s/sys /700s/web /700s/var /700s/space /700s/opt /700s/more /700s/lib
-chgrp staff /700s/more; chmod g+s /700s/more; chmod+660 /700s/more
+chgrp staff /700s/log /700s/svc /700s/sys /700s/web /700s/var /700s/space /700s/more /700s/lib
+chgrp staff /700s/more; chmod g+s /700s/more
 chmod u=rwx,g=rxs,o=x /700s/sys /700s/log /700s/var /700s/svc /700s/var
 mkdir /700s/sys/start /700s/sys/stop /700s/sys/bin
 chmod o+x /700s/sys/bin
 chmod g+s /700s/web /700s/lib
-chmod+664- /700s/web /700s/lib
-chmod+660 /700s/space
 
 cd /700s
 git init
 git remote add origin https://github.com/musicw/700s-server.git
 git pull https://github.com/musicw/700s-server.git master
+
+chmod+660 /700s/more
+chmod+664- /700s/web /700s/lib
+chmod+660 /700s/space
 
 chgrp staff .gitignore
 chmod a+rx  /700s/sys/env

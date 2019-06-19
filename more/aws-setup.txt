@@ -16,3 +16,4 @@ it says your instance(s) are now launching . the following has been initiated:
 (click the link)
 See the IP address and make a note of this. This will be the A record for the domain name, or you can add it to your hosts file
 Right click: instance settings: change termination protection: enable termination protection
+The Security group will need to be customized to allow inbound HTTP, HTTPS, SSH
