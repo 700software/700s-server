@@ -1,3 +1,6 @@
 log
 web
 var
+/sys/bin/node
+/sys/bin/npm
+/sys/bin/npx

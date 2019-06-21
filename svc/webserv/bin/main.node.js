@@ -22,6 +22,8 @@ var stopping = false
 var main_go = { shutdown: function () { } }
 var main_go_onstart = []
 
+require('/700s/lib/node/globals.node.js')
+
 var util = require('util')
 var child_io = require('../lib/child_io.node.js')(module)
 var msg_io = require('../lib/msg_io.node.js')
@@ -98,6 +100,10 @@ function stop(graceful) { // passes appropriate stop commands to mgtc and main_g
             stoppStuff()
         ending = true
         mgtc.removeAllListeners('listening')
+        
+        process.endd = true // new way to signal shutdown moving away from all the child_io / cio stuff
+        process.emit('endd')
+        
         main_go.shutdown()
         mgtc.end()
     }

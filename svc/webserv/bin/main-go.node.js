@@ -15,7 +15,7 @@ var util = require('util')
 var log = module.parent.require('../lib/log.node.js')
 var msg_io = module.parent.require('../lib/msg_io.node.js')
 var http_io = module.parent.require('../lib/http_io.node.js')
-var lockers = module.parent.require('../lib/lockers.node.js')
+var lockers = module.parent.require('/700s/lib/node/lockers.node.js')
 var child_io = module.parent.exports(module)
 
 var listener = { shutdown: function () { }, locker: lockers() }

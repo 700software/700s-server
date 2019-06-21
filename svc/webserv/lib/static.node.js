@@ -1,4 +1,4 @@
-#!/700s/sys/bin/node
+#!/usr/bin/env node
 if (require.main == module) { console.error('Direct usage not permitted. Please use require.'); process.exit(9) }
 
 //##

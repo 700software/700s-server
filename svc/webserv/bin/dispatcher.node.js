@@ -8,7 +8,7 @@ var path = require('path')
 var http_io = module.parent.require('../lib/http_io.node.js')
 
 var http_generic = module.parent.require('./http_generic.node.js')
-var route = module.parent.require('./router.node.js')(this.cio)
+var route = module.parent.require('./route.node.js')
 
 http_io.extend(cio)
 cio.on('http_request', function (req, res) {
@@ -39,6 +39,10 @@ cio.on('http_request', function (req, res) {
         }
         
     })
+})
+
+cio.on('shutdown', function () {
+    process.emit('endd')
 })
 
 function endsWith(s, x) {

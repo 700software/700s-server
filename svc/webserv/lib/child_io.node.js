@@ -6,7 +6,7 @@ var path = require('path')
 var vm = require('vm')
 var events = require('events')
 var stream = require('stream')
-var lockers = require('../lib/lockers.node.js')
+var lockers = require('/700s/lib/node/lockers.node.js')
 var log = require('../lib/log.node.js')
 
 module.exports = child_io
@@ -69,8 +69,15 @@ function readCompile(mpath, cio, callback) {
         context.module = { parent: module, filename: mpath }
         context.global = context
         context.cio = cio
+        
         callback(null, function () {
-            vm.runInNewContext(code, context, mpath)
+        
+            //vm.runInNewContext(code, context, mpath) // no longer carrying through globals like process and Buffer upon upgrading to node v12
+            
+            vm.compileFunction(code, [ 'require', 'module', 'cio' ], {
+                filename: mpath,
+            }).call(context, context.require, context.module, cio)
+            
         })
     })
 }

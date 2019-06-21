@@ -114,9 +114,9 @@ pkgin install nodejs
 ### PRIMARY directory /700s ###
 
 zfs create -o mountpoint=/700s -o aclinherit=passthrough -o snapdir=visible -o dedup=on rpool/700s
-chmod g=rx,o= /700s; chgrp 700s /700s
 zfs set mountpoint=none rpool/700s
 zfs create -o mountpoint=/700s rpool/700s/main
+chmod g=rx,o= /700s; chgrp 700s /700s
 zfs create -o dedup=off -o mountpoint=/700s/log rpool/700s/log
 zfs create -o mountpoint=/700s/space rpool/700s/space
 mkdir /700s/more /700s/svc /700s/sys /700s/var /700s/web /700s/lib
@@ -139,4 +139,8 @@ chmod+660 /700s/space
 chgrp staff .gitignore
 chmod a+rx  /700s/sys/env
 chmod o+x /700s/svc/webserv /700s/svc/webserv/bin /700s/svc/webserv/lib
-chmod o+rx /700s/svc/webserv/bin/* /700s/svc/webserv/lib/*
+chmod o+r /700s/svc/webserv/bin/* /700s/svc/webserv/lib/*
+
+# needed because git doesn't bring all that in
+chmod o+X /700s/lib/node
+chmod o+r /700s/lib/node/*

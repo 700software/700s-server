@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-//#!/usr/bin/env node
 
 //##
 //# This is the main program, which would be called by ./start and kept alive via ./wdog.

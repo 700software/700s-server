@@ -17,7 +17,7 @@ var os = require('os')
 var child_process = require('child_process')
 var log = module.parent.require('../lib/log.node.js')
 var http_extra = module.parent.require('../lib/http_extra.node.js')
-var lockers = module.parent.require('../lib/lockers.node.js')
+var lockers = module.parent.require('/700s/lib/node/lockers.node.js')
 
 var usrRoot = 0
 var grpStaff = 10
