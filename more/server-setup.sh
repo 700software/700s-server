@@ -57,9 +57,10 @@ echo "\n# Below lines added by us:\n%sudoers ALL=(ALL) ALL" >> /etc/sudoers
 groupadd -g 100 sudoers
 groupadd -g 101 700s
 usermod -G 700s webservd
+usermod -G 700s mysql
 
 ### USER creation ###
-useradd -u 100 -G sudoers,700s bryan # create your own user with the id consistent with the other servers, if any
+useradd -u 100 -G sudoers,700s,mysql bryan # create your own user with the id consistent with the other servers, if any
 mkdir /home/bryan; chown bryan:staff /home/bryan
 
 passwd bryan # this is quite important, since bryan is the only sudoer right now
@@ -109,7 +110,7 @@ mkdir /opt/local/var /opt/local/var/db
 mv /var/db/pkgin /opt/local/var/db
 ln -s ../../opt/local/var/db/pkgin /var/db
 
-pkgin install nodejs
+pkgin -y install nodejs
 
 ### PRIMARY directory /700s ###
 
@@ -132,6 +133,9 @@ git init
 git remote add origin https://github.com/musicw/700s-server.git
 git pull https://github.com/musicw/700s-server.git master
 
+mkdir node_modules; chgrp 700s node_modules; chmod g+s node_modules
+sudo npm install mysql2
+
 chmod+660 /700s/more
 chmod+664- /700s/web /700s/lib
 chmod+660 /700s/space
@@ -144,3 +148,49 @@ chmod o+r /700s/svc/webserv/bin/* /700s/svc/webserv/lib/*
 # needed because git doesn't bring all that in
 chmod o+X /700s/lib/node
 chmod o+r /700s/lib/node/*
+
+### setup mariadb ###
+
+echo "complete -W \"\`echo \\\`mysql -se 'select schema_name\"\" from information_schema.SCHEMATA' 2> /dev/null\\\`\`\" mysql\n" >> /etc/profile
+
+zfs create -o dedup=off -o compression=off -o mountpoint=/700s/db rpool/700s/db
+zfs create -o compression=gzip rpool/700s/db/binlogs
+chown mysql:mysql /700s/db /700s/db/binlogs; chmod g+s,o= /700s/db /700s/db/binlogs; chmod o=x /700s/db
+mkdir /700s/dbi; chmod o=x /700s/dbi; chgrp staff /700s/dbi
+
+ln -s ../../../700s/sys/misc/my.cnf /etc/my.cnf
+touch /700s/log/mysql-error.log; chown mysql /700s/log/mysql-error.log
+
+chmod a+rX /700s/sys/misc/mysqld-svc-method /700s/sys/misc/my.cnf # might be redundant, depending on how git brings it in..
+
+pkgin -y install mysql-server
+
+chmod a+rX /opt/local/lib/svc /opt/local/lib/svc/method
+chmod -R a+rX /opt/local/share/mysql
+mv /opt/local/lib/svc/method/mysqld /opt/local/lib/svc/method/mysqld.orig
+ln -s ../../../../../700s/sys/misc/mysqld-svc-method  /opt/local/lib/svc/method/mysqld
+
+ln -s /700s/db /var/mysql # needed only because the way the service was configured. my.cnf dictates otherwise
+svcadm enable mysql
+
+# set mysql root password
+X=`openssl rand -base64 9`
+mysqladmin password "$X"
+echo "[client]\nuser=root\npassword=$X" > ~/.my.cnf
+chmod 600 ~/.my.cnf
+
+mysql mysql -e 'delete from user where user="" or host<>"127.0.0.1"; flush privileges'
+
+# additional users
+X=`openssl rand -base64 9`
+mysql -e "grant all on *.* to bryan@localhost identified by '$X' with grant option"
+echo "[client]\nuser=bryan\npassword=$X" > /home/bryan/.my.cnf
+chmod 600 /home/bryan/.my.cnf; chown bryan /home/bryan/.my.cnf
+
+
+
+
+
+### user setup mariadb ###
+
+
