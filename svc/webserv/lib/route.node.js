@@ -188,8 +188,17 @@ module.exports = function route(docrootBegin, req, res, options) {
         req.context += req.pi.substring(0, req.pi.length - path.length)
         req.pi = path
 
-        acquire(file, stats).then(function (loaded) {
-            loaded(req, res)
+        acquire(file, stats).then(async function (m) {
+            var promise = m.mypleasure(req, res)
+            // request handlers (affectionately dubbed mypleasure)
+            // are not required to return any result, just to fulfill the request async.
+            // However, if they are kind enough to return a promise,
+            // we can use it to catch errors instead of crashing! :-)
+            if (promise && promise.catch)
+                promise.catch(function (err) {
+                    log.err(err.stack)
+                    http_generic(req, res, 500)
+                })
         }).catch(function (err) {
             log.err(err.stack)
             http_generic(req, res, 500)

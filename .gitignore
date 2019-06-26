@@ -1,6 +1,9 @@
-log
-web
-var
+/log
+/web
+/var
+/db
+/dbi
 /sys/bin/node
 /sys/bin/npm
 /sys/bin/npx
+/node_modules
