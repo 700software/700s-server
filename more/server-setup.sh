@@ -71,6 +71,9 @@ sudo -u bryan sudo passwd -N root # this command will test sudo works and then r
  
 ### MORE CUSTOMIZATION ###
 
+zfs create -V 1G rpool/swap
+swap -a /dev/zvol/dsk/rpool/swap
+
 svcadm disable sendmail # enabled later when configured
 svcadm disable sendmail-client
 svcadm disable ndp # this one doesn't persist across reboot for some reason, I think some others are like this as well
