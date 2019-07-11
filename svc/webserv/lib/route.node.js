@@ -11,7 +11,7 @@ if (require.main == module) { console.error('Direct usage not permitted. Please 
 // can be overridden with ,.node.js
 
 // If any of these file/directory names are found in the path, 404 is returned regardless of whether they exist in the docroot.
-var mask_404 = [ 'WEB-INF', 'META-INF', 'node_modules', 'README.md' ]
+var mask_404 = [ 'WEB-INF', 'META-INF', 'node_modules', 'README.md', 'internal' ]
 var unmask_404 = [ '.well-known' ] // anything else that starts with . returns 404 automatically e.g. .git, .zfs, etc.
 
 var static_exts = [
@@ -27,7 +27,6 @@ var static_exts = [
     '.pdf',
     // also consider adding mime type to static.node.js exports.ctypes, or else it will default to application/octet-stream
 ]
-
 
 var auto_exts = [ '.html', '.node.js', '.json' ]
 
