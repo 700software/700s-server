@@ -137,7 +137,7 @@ git remote add origin https://github.com/musicw/700s-server.git
 git pull https://github.com/musicw/700s-server.git master
 
 mkdir node_modules; chgrp 700s node_modules; chmod g+s node_modules
-sudo npm install mysql2
+sudo npm install mysql2 libmime libqp libbase64
 
 chmod+660 /700s/more
 chmod+664- /700s/web /700s/lib
@@ -152,7 +152,7 @@ chmod o+r /700s/svc/webserv/bin/* /700s/svc/webserv/lib/*
 chmod o+X /700s/lib/node
 chmod o+r /700s/lib/node/*
 
-### setup mariadb ###
+### setup mysql ###
 
 echo "complete -W \"\`echo \\\`mysql -se 'select schema_name\"\" from information_schema.SCHEMATA' 2> /dev/null\\\`\`\" mysql\n" >> /etc/profile
 
@@ -192,8 +192,15 @@ chmod 600 /home/bryan/.my.cnf; chown bryan /home/bryan/.my.cnf
 
 
 
+### configure mail ###
+
+#pkgin -y sendmail
+
+# decided not to use sendmail, but just the preinstalled DragonFly Mail Authority (dma)
+# • in /etc/dma/dma.conf, uncomment SECURETRANSFER and STARTTLS and OPPORTUNISTIC_TLS
+# • also configure MAILNAME to match site domain
+# • set SMARTHOST and auth.conf to use smtp relaying service
 
 
-### user setup mariadb ###
 
 
