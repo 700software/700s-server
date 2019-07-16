@@ -190,7 +190,8 @@ mysql -e "grant all on *.* to bryan@localhost identified by '$X' with grant opti
 echo "[client]\nuser=bryan\npassword=$X" > /home/bryan/.my.cnf
 chmod 600 /home/bryan/.my.cnf; chown bryan /home/bryan/.my.cnf
 
-
+# timezones
+mysql_tzinfo_to_sql /usr/share/lib/zoneinfo | mysql --force mysql
 
 ### configure mail ###
 
