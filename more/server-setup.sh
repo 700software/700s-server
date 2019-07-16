@@ -152,6 +152,9 @@ chmod o+r /700s/svc/webserv/bin/* /700s/svc/webserv/lib/*
 chmod o+X /700s/lib/node
 chmod o+r /700s/lib/node/*
 
+logadm -C4 -w /700s/log/webserv.log # set automatic log file rotation, 4 copies
+logadm -C2 -w /700s/log/mysql-error.log
+
 ### setup mysql ###
 
 echo "complete -W \"\`echo \\\`mysql -se 'select schema_name\"\" from information_schema.SCHEMATA' 2> /dev/null\\\`\`\" mysql\n" >> /etc/profile
