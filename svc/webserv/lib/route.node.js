@@ -188,6 +188,10 @@ module.exports = function route(docrootBegin, req, res, options) {
         req.pi = path
 
         acquire(file, stats).then(async function (m) {
+            if (!m.mypleasure) {
+                http_generic(req, res, 404)
+                return
+            }
             var promise = m.mypleasure(req, res)
             // request handlers (affectionately dubbed mypleasure)
             // are not required to return any result, just to fulfill the request async.

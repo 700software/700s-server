@@ -40,6 +40,7 @@ reboot
 
 ### CUSTOMIZATION ###
 
+echo "\n# Below lines added by us:\n\nTZ=America/Chicago" >> /etc/TIMEZONE
 echo "\n# Below lines added by us:\n\numask 027\nPATH=/700s/sys/bin:/opt/local/sbin:/opt/local/bin:/usr/gnu/bin:/usr/bin:/usr/sbin:/sbin\nMANPATH=/opt/local/man:/usr/share/man\n\nexport LANG=en_US.UTF-8\n\nexport PS1=\"\u@\h:\w\\\\\\$ \"\n\nalias beep='echo -en \\\\\\\\a'\nalias ls='ls --color'\nalias grep='grep --color'\nalias l='ls -lh'\n\ncomplete -d cd" >> /etc/profile
 exit
 # login again
