@@ -84,6 +84,8 @@ function sanitize(req, res, callback) { // only on listener receive of request
 
     req.pi = req.path
 
+    req.res = res
+
     if (req.path != pathO) {
         res.writeHead(308, { 'Location': req.protocol + '://' + req.headers.host + req.path + req.search })
         res.end()
