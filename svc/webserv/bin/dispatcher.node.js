@@ -16,12 +16,13 @@ cio.on('http_request', function (req, res) {
     // http_extra ensures no path traversal from this
     var domainRoot = req.listenerMultiDomain ? path.join(req.listenerDocroot, req.headers.host) : req.listenerDocroot
     fs.stat(domainRoot, function (err) {
-        if(err) {
-            if(err.code == 'ENOENT') {
+        if (err) {
+            if (err.code == 'ENOENT' && req.listenerMultiDomain) {
                 var alt = req.headers.host.substring(0, 4) == 'www.' ? req.headers.host.substring(4) : 'www.' + domainRoot
+                alt = alt.replace(/\.+$/, '')
                 var altRoot = path.join(req.listenerDocroot, alt) // http_extra ensures no path traveral from this
                 fs.stat(altRoot, function (err2) {
-                    if(err2) {
+                    if (err2) {
                         http_generic(req, res, 404)
                     } else {
                         res.writeHead(301, { 'Location': req.protocol + '://' + alt + req.path + req.search })

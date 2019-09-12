@@ -58,15 +58,21 @@ function sanitize(req, res, callback) { // only on listener receive of request
     // it's important not to un-encode anything that the browser will re-encode automatically
     // it's also important that file-system unsafe characters (e.g. NUL and control characters) always get encoded.
 
-    if (!req.headers.host) {
+    var host = req.headers.host
+
+    if (!host) {
         http_generic(req, res, 404, 'Missing Host header!')
         return
-    } else if (req.headers.host.length > 255 || !/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*(?::(?!0)\d{1,5})?$/.test(req.headers.host)) {
+    }
+    
+    host = host.replace(/\.+$/, '')
+    
+    if (host.length > 255 || !/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*(?::(?!0)\d{1,5})?$/.test(host)) {
         // the only thing it doesn't check as far as validity goes is that there is a max of 63 chars between dots. See stackoverflow.com/a/1133454
         http_generic(req, res, 404, 'Host header not valid!')
         return
     }
-
+    
     if (path.join(secret, req.path).substring(0, secret.length) != secret) { // when path traversal is attempted
         http_generic(req, res, 400, 'Hey. Stop that.')
         return
@@ -86,8 +92,8 @@ function sanitize(req, res, callback) { // only on listener receive of request
 
     req.res = res
 
-    if (req.path != pathO) {
-        res.writeHead(308, { 'Location': req.protocol + '://' + req.headers.host + req.path + req.search })
+    if (req.path != pathO || req.headers.host != host) {
+        res.writeHead(308, { 'Location': req.protocol + '://' + host + req.path + req.search })
         res.end()
     } else
         callback(req, res)
