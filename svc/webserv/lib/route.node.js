@@ -80,7 +80,7 @@ module.exports = function route(docrootBegin, req, res, options) {
         tryFilter()
 
         function tryFilter() {
-            if (docr != docrootBegin) {
+            if (options.filterTopLevel || docr.length != docrootBegin.length) {
                 var pathToFilter = docr + '/,.node.js'
                 fs.stat(pathToFilter, function (err, stats) {
                     if(err) {

@@ -34,9 +34,7 @@ cio.on('http_request', function (req, res) {
             }
         } else {
             // http_extra ensures req.headers.host is safe
-            req.pi = '/' + path.basename(domainRoot) + req.pi
-            // using the parent of domainRoot  as a starting point so that route's tryFilter will also work at the top level (domainRoot/,.node.js)
-            route(path.dirname(domainRoot), req, res)
+            route(domainRoot, req, res, { filterTopLevel: true })
         }
         
     })
