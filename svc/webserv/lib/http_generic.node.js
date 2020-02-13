@@ -25,7 +25,7 @@ module.exports = function () {
             http_generic = require(location)
         } catch (err) { // doesn't exist, syntax error, etc
             if(err.stack != last) {
-                log.warn((last ? 'Still cannot' : 'Could not') + ' load ' + location + '. Using plain-text backup error pages instead.\n ' + err.stack)
+                log.warn((last ? 'Still cannot' : 'Could not') + ' load ' + location + '. Using plain-text backup error pages instead. (' + err.message.replace(/\nRequire stack:(?:\n- .*)+$/, '') + ')')
                 last = err.stack
             }
             http_generic_generic.apply(this, arguments)

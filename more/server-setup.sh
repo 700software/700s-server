@@ -76,18 +76,15 @@ zfs create -V 1G rpool/swap
 swap -a /dev/zvol/dsk/rpool/swap
 
 svcadm disable sendmail # enabled later when configured
-svcadm disable sendmail-client
 svcadm disable ndp # this one doesn't persist across reboot for some reason, I think some others are like this as well
 svcadm disable zones
 svcadm disable ktkt_warn
-svcadm disable metainit
 svcadm disable gss
 svcadm disable rpc/bind
 svcadm disable smserver # used in CDE (desktop) for managing removable devices
 svcadm disable group:default # best I can tell, used for SAMBA, related to network shared folders
 svcadm disable group:zfs
 svcadm disable sac
-svcadm disable metasync
 svcadm disable dbus
 svcadm disable hal
 svcadm disable fcoe_initiator
@@ -95,7 +92,6 @@ svcadm disable ipsecalgs
 svcadm disable ipsec/policy
 svcadm disable zones-monitoring
 svcadm disable resource-mgmt
-svcadm disable iscsi/initiator
 svcadm disable rpc/bind # for security, close TCP port sunrpc
 svcadm disable iptun
 svcadm disable routing/route # for security, close TCP port 520 (route)
@@ -105,16 +101,19 @@ pkg install gnu-tar
 pkg install git
 sudo git config --global --edit # set default name and email for commits done as root
 
-chmod g+w /etc/motd; sudo chgrp staff /etc/motd
+chmod g+w /etc/motd; chgrp staff /etc/motd
 
 zfs create -o mountpoint=/opt/local rpool/opt-local
-cd /tmp; curl -O https://pkgsrc.joyent.com/packages/SmartOS/bootstrap/bootstrap-trunk-x86_64-20190317.tar.gz
-cd /; tar -zxpf /tmp/bootstrap-trunk-x86_64-20190317.tar.gz
+cd /tmp; curl -O https://pkgsrc.joyent.com/packages/SmartOS/bootstrap/bootstrap-trunk-x86_64-20191127.tar.gz
+cd /; tar -zxpf /tmp/bootstrap-trunk-x86_64-20191127.tar.gz
 mkdir /opt/local/var /opt/local/var/db
 mv /var/db/pkgin /opt/local/var/db
 ln -s ../../opt/local/var/db/pkgin /var/db
 
 pkgin -y install nodejs
+pkgin -y install npm
+
+passwd -N webservd # allow cron jobs
 
 ### PRIMARY directory /700s ###
 
@@ -127,22 +126,22 @@ zfs create -o mountpoint=/700s/space rpool/700s/space
 mkdir /700s/more /700s/svc /700s/sys /700s/var /700s/web /700s/lib
 chgrp staff /700s/log /700s/svc /700s/sys /700s/web /700s/var /700s/space /700s/more /700s/lib
 chgrp staff /700s/more; chmod g+s /700s/more
-chmod u=rwx,g=rxs,o=x /700s/sys /700s/log /700s/var /700s/svc /700s/var
+chmod u=rwx,g=rxs,o=x /700s/sys /700s/sys/misc /700s/log /700s/var /700s/svc /700s/var
 mkdir /700s/sys/start /700s/sys/stop /700s/sys/bin
 chmod o+x /700s/sys/bin
 chmod g+s /700s/web /700s/lib
 
+chmod+660 /700s/more # will these three stick, or do they have to be moved to after the git pull? Trying to make descendants right...
+chmod+664- /700s/web /700s/lib
+chmod+660 /700s/space
+
 cd /700s
 git init
-git remote add origin https://github.com/musicw/700s-server.git
-git pull https://github.com/musicw/700s-server.git master
+git remote add origin https://github.com/700software/700s-server.git
+git pull https://github.com/700software/700s-server.git master
 
 mkdir node_modules; chgrp 700s node_modules; chmod g+s node_modules
 sudo npm install mysql2 libmime libqp libbase64
-
-chmod+660 /700s/more
-chmod+664- /700s/web /700s/lib
-chmod+660 /700s/space
 
 chgrp staff .gitignore
 chmod a+rx  /700s/sys/env
@@ -171,7 +170,8 @@ touch /700s/log/mysql-error.log; chown mysql /700s/log/mysql-error.log
 chmod a+rX /700s/sys/misc/mysqld-svc-method /700s/sys/misc/my.cnf # might be redundant, depending on how git brings it in..
 
 pkgin -y install mysql-server
-
+chmod -R a+rX /opt/local/share/mysql
+  
 chmod a+rX /opt/local/lib/svc /opt/local/lib/svc/method
 chmod -R a+rX /opt/local/share/mysql
 mv /opt/local/lib/svc/method/mysqld /opt/local/lib/svc/method/mysqld.orig
@@ -186,7 +186,7 @@ mysqladmin password "$X"
 echo "[client]\nuser=root\npassword=$X" > ~/.my.cnf
 chmod 600 ~/.my.cnf
 
-mysql mysql -e 'delete from user where user="" or host<>"127.0.0.1"; flush privileges'
+mysql mysql -e 'delete from user where user="" or host<>"127.0.0.1" and host<>"localhost"; flush privileges'
 
 # additional users
 X=`openssl rand -base64 9`
@@ -207,5 +207,8 @@ mysql_tzinfo_to_sql /usr/share/lib/zoneinfo | mysql --force mysql
 # • set SMARTHOST and auth.conf to use smtp relaying service
 
 
+## all done ##
 
+./S700s start
+# or reboot
 

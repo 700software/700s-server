@@ -19,7 +19,7 @@ var static_exts = [
     '.apk',
     '.ico',
     '.png', '.gif', '.jpg', '.jpeg', '.bmp',
-    '.mp4',
+    '.mp3', '.mp4',
     '.woff', '.woff2', '.ttf', 'ttc', 'otf', '.eot',
     '.webmanifest',
     '.xml',
@@ -187,7 +187,7 @@ module.exports = function route(docrootBegin, req, res, options) {
         req.context += req.pi.substring(0, req.pi.length - path.length)
         req.pi = path
 
-        acquire(file, stats).then(async function (m) {
+        acquire(file, req, stats).then(async function (m) {
             if (!m.mypleasure) {
                 http_generic(req, res, 404)
                 return

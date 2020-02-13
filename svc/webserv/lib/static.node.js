@@ -50,6 +50,7 @@ exports.ctypes = {
     'js': 'text/javascript',
     'pdf': 'application/pdf',
     'apk': 'application/vnd.android.package-archive',
+    'mp3': 'audio/mpeg',
     'mp4': 'video/mp4',
     'ico': 'image/x-icon',
 }
@@ -191,7 +192,10 @@ function main(req, res, file, o) {
             if (range[0] != 0 || range[1] != length - 1)
                 res.statusCode = 206 // partial response
             
-            res.setHeader('Content-Range', 'bytes ' + range[0] + '-' + range[1] + '/' + length) 
+            if (res.statusCode == 206) {
+                res.setHeader('Content-Range', 'bytes ' + range[0] + '-' + range[1] + '/' + length) 
+                res.setHeader('Content-Length', range[0] - range[1] + 1) // shorter Content-Length needed for iPad to represent audio seekable correctly
+            }
             
             if (range[0] > range[1]) {
                 res.end()
