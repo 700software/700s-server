@@ -41,7 +41,7 @@ var http_generic = module.parent.require('./http_generic.node.js')
 var staticHandler = module.parent.require('../lib/static.node.js')
 var acquire = require('/700s/lib/node/acquirer.node.js')(module)
 
-module.exports = function route(docrootBegin, req, res, options) {
+exports = module.exports = function route(docrootBegin, req, res, options) {
 
     if (!options) options = { }
 
@@ -148,9 +148,9 @@ module.exports = function route(docrootBegin, req, res, options) {
                                     }
                                 } else {
                                     outer: for (var i = 0; i < static_exts.length; i++)
-                                        if (endsWith(next, static_exts[i])) { // finds things like .js, .ico
+                                        if (next.endsWith(static_exts[i])) { // finds things like .js, .ico
                                             for (var i = 0; i < auto_exts.length; i++)
-                                                if (endsWith(next, auto_exts[i])) // finds .node.js
+                                                if (next.endsWith(auto_exts[i])) // finds .node.js
                                                     break outer // prevents viewing source code which is what you normally would get for .js
                                             proceedStatic(docr + next + ext, stats, path)
                                             return
@@ -209,9 +209,9 @@ module.exports = function route(docrootBegin, req, res, options) {
     }
 
     function proceedStatic(file, stats, path) {
-        if(!endsWith(file, '.html') && !endsWith(file, '.json'))
+        if(!file.endsWith('.html') && !file.endsWith('.json'))
             for(var i = 0; i < auto_exts.length; i++)
-                if(endsWith(file, auto_exts[i])) {
+                if(file.endsWith(auto_exts[i])) {
                     if (options.onNotFound)
                         if (options.onNotFound() == false)
                             return
@@ -251,8 +251,9 @@ module.exports = function route(docrootBegin, req, res, options) {
 
 }
 
-
-function endsWith(s, x) {
-    return s.substring(s.length - x.length) == x
+exports.chomp = function (req, section) {
+    if (req.pi != section && !req.pi.startsWith(section + '/'))
+        throw new Error("Can't chomp “" + section + '” out of req.pi “' + req.pi + '” (req.context “' + req.context + '”)')
+    req.context += section
+    req.pi = req.pi.substring(section.length)
 }
-
