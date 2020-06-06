@@ -53,6 +53,7 @@ exports.ctypes = {
     'mp3': 'audio/mpeg',
     'mp4': 'video/mp4',
     'ico': 'image/x-icon',
+    'svg': 'image/svg+xml',
 }
 
 //# what mime types are incapable of triggering XSS when viewed directly, used to show untrusted content to the screen (i.e. pdf and images), can provide file download otherwise (i.e. html files)
@@ -65,6 +66,7 @@ exports.safeToRender = {
     'text/plain': true,
     'application/pdf': true,
     'image/x-icon': true,
+    'image/svg+xml': true,
 }
 
 //##

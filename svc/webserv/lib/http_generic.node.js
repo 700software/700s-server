@@ -14,7 +14,8 @@ var log = module.parent.require('../lib/log.node.js')
 var http = require('http')
 var http_generic
 var http_generic_generic = function (req, res, statusCode, statusReason) { // to be self reliant
-    res.writeHead(statusCode, statusReason)
+    res.statusCode = statusCode
+    res.statusReason = statusReason
     res.end(statusCode + ' ' + (statusReason || http.STATUS_CODES[statusCode]))
 }
 var last = null
