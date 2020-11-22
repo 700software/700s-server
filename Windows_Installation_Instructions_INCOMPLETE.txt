@@ -1,0 +1,4 @@
+1. Fork and then clone this repo: https://github.com/700software/700s-server
+2. Download node.js from here: https://nodejs.org/en/
+	https://docs.microsoft.com/en-us/windows/wsl/install-win10
+3. If wanting to perform some kind of testing(??) download MySQL: 
