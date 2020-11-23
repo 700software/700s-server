@@ -92,4 +92,23 @@ To increase the size of the `rpool`
     root@ip-172-31-37-147:~# 
     ```
     
-    Detaching the original smaller volume TBD
+4. Detaching the original smaller volume
+
+   (after waiting for resilver to complete... monitor that with `zpool status`)
+
+   ```sh
+   zpool detach rpool c1t0d0 
+   ```
+
+5. Shut down the instance (can be done with AWS right click and Stop)
+
+   (Not terminate! In fact you should have termination protection enabled)
+
+6. After shutdown finishes you can detach the original root volume
+
+7. Then detach the larger volume and reattach it as root (Device `/dev/xvda`)
+
+8. Bring up the Instance. Boom! We have more disk space.
+
+9. Before making a major version upgrade or any upgrade that requires a new boot environment you'll have to follow the instructions [fixing root labeled] (currently in server-setup.sh document)
+
