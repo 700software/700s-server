@@ -1,5 +1,4 @@
 /log
-/web
 /var
 /db
 /dbi
@@ -7,3 +6,4 @@
 /sys/bin/npm
 /sys/bin/npx
 /node_modules
+/web

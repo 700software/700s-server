@@ -73,14 +73,14 @@ function sanitize(req, res, callback) { // only on listener receive of request
         return
     }
     
-    if (path.join(secret, req.path).substring(0, secret.length) != secret) { // when path traversal is attempted
+    if (joinCross(secret, req.path).substring(0, secret.length) != secret) { // when path traversal is attempted
         http_generic(req, res, 400, 'Hey. Stop that.')
         return
     }
 
     var pathO = req.path
 
-    req.path = path.join('/', req.path) // normalize ../ ./ and // (remove extra slashes for consistent relative URLS in HTML)
+    req.path = joinCross('/', req.path) // normalize ../ ./ and // (remove extra slashes for consistent relative URLS in HTML)
 
     req.host = req.headers.host
 
@@ -110,3 +110,9 @@ function extras(req, res, callback) { // after deserialize via http_io
     callback(req, res)
 }
 
+function joinCross() { // cross-platform version of path.join
+	if (path.sep == '\\')
+		return path.join.apply(null, arguments).replace(/\\/g, '/')
+	else
+		return path.join.apply(null, arguments)
+}

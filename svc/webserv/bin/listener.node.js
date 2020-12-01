@@ -195,7 +195,7 @@ function aldone() {
             anyNo = true
     if(anyYes && !anyNo)
         log.end('uptime begins')
-    if (process.getuid() == 0) { // reduces privileges if launched from root with fork option
+    if (process.getuid && process.getuid() == 0) { // reduces privileges if launched from root with fork option
         var http_generic = module.parent.require('./http_generic.node.js')
         process.initgroups('webservd', 'webservd')
         process.setgid('webservd')

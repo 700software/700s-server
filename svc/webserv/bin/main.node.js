@@ -27,20 +27,32 @@ require('/700s/lib/node/globals.node.js')
 var util = require('util')
 var child_io = require('../lib/child_io.node.js')(module)
 var msg_io = require('../lib/msg_io.node.js')
+var path = require('path')
 
-var mgtc = require('./main-command.node.js')()
+if (path.sep == '/')
+    var mgtc = require('./main-command.node.js')()
 
 handleKills()
 
-startCommandChannel(function () {
-    child_io.launch('./main-go.node.js', 'main-go', {}, function (x) { // called when child starts or restarts
-        main_go = x
-        newMainGo(x)
-        function newMainGo(main_go) {
-            msg_io.extend(main_go)
-        }
-    })
-})
+if (mgtc)
+	startCommandChannel(function () {
+		child_io.launch('./main-go.node.js', 'main-go', {}, function (x) { // called when child starts or restarts
+			main_go = x
+			newMainGo(x)
+			function newMainGo(main_go) {
+				msg_io.extend(main_go)
+			}
+		})
+	})
+else
+	child_io.launch('./main-go.node.js', 'main-go', {}, function (x) { // called when child starts or restarts
+		main_go = x
+		newMainGo(x)
+		function newMainGo(main_go) {
+			msg_io.extend(main_go)
+		}
+	})
+	
 
 function startCommandChannel(callback) {
     mgtc.on('listening', function () {
@@ -99,13 +111,14 @@ function stop(graceful) { // passes appropriate stop commands to mgtc and main_g
         } else
             stoppStuff()
         ending = true
+		if (mgtc)
         mgtc.removeAllListeners('listening')
         
         process.endd = true // new way to signal shutdown moving away from all the child_io / cio stuff
         process.emit('endd')
         
         main_go.shutdown()
-        mgtc.end()
+        if (mgtc) mgtc.end()
     }
     function stoppStuff() { // non-graceful shutdown // usually an error event, but not necessarily
         log.beg('stopping')
